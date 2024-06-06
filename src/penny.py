@@ -5,6 +5,7 @@ import openai
 from rich.console import Console
 from rich.table import Table
 from rich.markdown import Markdown
+from anthropic import AnthropicBedrock
 
 
 client = openai.OpenAI()
@@ -22,7 +23,10 @@ console = Console()
 @click.option(
     "--input_data", type=str, default=None, help="The input data to pass to the prompt."
 )
-def penny(search, input, input_data):
+@click.option(
+    "--model", type=str, default="anthropic.claude-3-sonnet-20240229-v1:0", help="The model to use for the prompt."
+)
+def penny(search, input, input_data, model):
     """
     A CLI tool for executing prompts from the instructions folder using OpenAI's API.
 
@@ -31,32 +35,37 @@ def penny(search, input, input_data):
         input (str): The name of the prompt to execute.
         input_data (str): The input data to pass to the prompt.
     """
+    client = AnthropicBedrock(aws_region="us-west-2")
     if not input_data:
         # If no input data is provided via command-line, try to read from stdin
         if not sys.stdin.isatty():
             input_data = sys.stdin.read().strip()
-            console.print("Reading input data from stdin...", style="bold yellow")
+            console.print("Reading input data from stdin...",
+                          style="bold yellow")
         else:
-            console.print("No input data provided and no data piped.", style="bold red")
+            console.print(
+                "No input data provided and no data piped.", style="bold red")
             return
 
     if search:
         # Search for prompts in the instructions folder
-        prompts = []
-        for file in os.listdir("instructions"):
-            if file.endswith(".txt"):
-                prompts.append(file)
-        print(f"prompts: {prompts}")
-        if prompts:
-            table = Table(title="Available Prompts")
-            table.add_column("Prompt Name", style="bold cyan")
-            for prompt in prompts:
-                table.add_row(prompt)
-            console.print(table)
-        else:
-            console.print(
-                "No prompts found in the instructions folder.", style="bold red"
-            )
+        print("Search not implemented yet.")
+        # prompts = []
+        # for file in os.listdir("instructions"):
+        #     if file.endswith(".txt"):
+        #         prompts.append(file)
+        # print(f"prompts: {prompts}")
+        # if prompts:
+        #     table = Table(title="Available Prompts")
+        #     table.add_column("Prompt Name", style="bold cyan")
+        #     for prompt in prompts:
+        #         table.add_row(prompt)
+        #     console.print(table)
+        # else:
+        #     console.print(
+        #         "No prompts found in the instructions folder.", style="bold red"
+        #     )
+
     elif input:
         # Execute the specified prompt
         prompt_file = os.path.join("instructions", f"{input}.txt")
@@ -69,10 +78,9 @@ def penny(search, input, input_data):
             console.print(
                 f"## Executing prompt: {input} with input data:", style="bold blue"
             )
-            console.print(f"{input_data}", style="italic")
             # Execute the prompt with the provided input data using OpenAI's API
-            response = client.chat.completions.create(
-                model="gpt-4o",
+            response = client.messages.create(
+                model=model,
                 messages=[
                     {
                         "role": "user",
@@ -82,11 +90,12 @@ def penny(search, input, input_data):
                 max_tokens=2000,
             )
             console.print("### Response from OpenAI:", style="bold green")
-            console.print(Markdown(response.choices[0].message.content))
+            console.print(Markdown(response.content[0].text))
         else:
             console.print(f"Prompt not found: {input}", style="bold red")
     else:
-        console.print("Please provide either the -s or -i option.", style="bold yellow")
+        console.print("Please provide either the -s or -i option.",
+                      style="bold yellow")
 
 
 if __name__ == "__main__":

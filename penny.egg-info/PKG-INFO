@@ -9,3 +9,13 @@ Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.11
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: openai
+Requires-Dist: click
+Requires-Dist: pydantic
+Requires-Dist: rich
+Requires-Dist: anthropic
+Requires-Dist: pyyaml
+Requires-Dist: instructor
+Requires-Dist: boto3

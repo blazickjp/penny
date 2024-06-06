@@ -14,8 +14,11 @@ setup(
         "openai",
         "click",
         "pydantic",
+        "rich",
+        "anthropic",
         "pyyaml",
         "instructor",
+        "boto3",
     ],
     entry_points={
         "console_scripts": [
